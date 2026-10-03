@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d6456f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Планер">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Недельный планер</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#fdf1f4;--card:#fffafb;--ink:#3d2630;--mut:#a08490;--line:#f5dfe6;--acc:#d6456f;--bad:#c0264b;
+--c-fuel:#f4a58a;--c-food:#e58fb0;--c-china:#d6456f;--c-self:#b98ad1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1318;--card:#291b22;--ink:#fbe8ef;--mut:#b094a0;--line:#3d2a33;--acc:#f27a9f;--bad:#ff7a93}}
+:root[data-theme="dark"]{--bg:#1d1318;--card:#291b22;--ink:#fbe8ef;--mut:#b094a0;--line:#3d2a33;--acc:#f27a9f;--bad:#ff7a93}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Inter","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:480px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:15px;font-weight:600;color:var(--mut);margin:0 0 20px;letter-spacing:.02em}
+.card{background:var(--card);border-radius:20px;padding:20px;margin-bottom:12px}
+label{font-size:12px;color:var(--mut);display:block;margin-bottom:6px}
+input,select{font:inherit;color:var(--ink);background:transparent;border:0;outline:0;width:100%}
+.big{font-size:44px;font-weight:600;letter-spacing:-.02em}
+.row{display:flex;gap:10px;align-items:center}
+.item{margin-bottom:18px}.item:last-child{margin-bottom:0}
+.top{display:flex;justify-content:space-between;align-items:baseline}
+.name{font-size:14px;display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%}
+.sum{font-size:20px;font-weight:600}
+.bar{height:6px;background:var(--line);border-radius:3px;margin:8px 0 6px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px;transition:width .3s}
+.sub{font-size:12px;color:var(--mut)}
+.neg{color:var(--bad)}
+.add{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.add .f{background:var(--bg);border-radius:12px;padding:10px 12px}
+.add .w{grid-column:1/3}
+button{font:inherit;border:0;border-radius:12px;padding:12px;background:var(--acc);color:var(--bg);font-weight:600;cursor:pointer}
+button.ghost{background:transparent;color:var(--mut);font-weight:400;font-size:13px}
+.log div{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.log small{color:var(--mut);display:block;font-size:12px}
+.log b{font-weight:500}.log button{padding:4px 8px;background:none;color:var(--mut);font-weight:400}
+details summary{cursor:pointer;font-size:14px;color:var(--mut);list-style:none}
+details .g{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+details .f{background:var(--bg);border-radius:12px;padding:10px 12px}
+.goal{background:linear-gradient(135deg,#fcd9e4,#f8bcd0);color:#3d2630}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .goal{background:linear-gradient(135deg,#4d2736,#613048);color:#fbe8ef}}
+:root[data-theme="dark"] .goal{background:linear-gradient(135deg,#4d2736,#613048);color:#fbe8ef}
+.goal .t{display:flex;justify-content:space-between;align-items:baseline}
+.goal .lbl{font-size:12px;opacity:.7}.goal .amt{font-size:28px;font-weight:600;letter-spacing:-.02em}
+.goal .bar{background:rgba(255,255,255,.45);height:10px;border-radius:5px;margin:12px 0}
+.goal .bar i{background:linear-gradient(90deg,#f7a1bd,#d6456f);border-radius:5px}
+.goal .msg{font-size:15px;line-height:1.45}.goal .sub{color:inherit;opacity:.65;margin-top:8px}
+.hint{font-size:12px;color:var(--mut);margin-top:12px;line-height:1.4}
+</style>
+</head>
+<body>
+<main>
+<h1>НЕДЕЛЬНЫЙ ПЛАНЕР</h1>
+
+<div class="card">
+  <label>Сколько пришло на неделю, ₽</label>
+  <input class="big" id="income" type="number" inputmode="numeric" placeholder="5500">
+</div>
+
+<div class="card goal" id="goalCard"></div>
+
+<div class="card" id="plan"></div>
+
+<div class="card">
+  <label>Записать трату</label>
+  <div class="add">
+    <div class="f"><select id="cat"></select></div>
+    <div class="f"><input id="amt" type="number" inputmode="numeric" placeholder="Сумма"></div>
+    <div class="f w"><input id="note" placeholder="Заметка (необязательно)"></div>
+    <button class="w" id="addBtn">Добавить</button>
+  </div>
+</div>
+
+<div class="card log" id="log"></div>
+
+<div class="card">
+  <details>
+    <summary>Настройки</summary>
+    <div class="g">
+      <div class="f"><label>Бензин / нед</label><input id="fuel" type="number" inputmode="numeric"></div>
+      <div class="f"><label>Продукты / нед</label><input id="food" type="number" inputmode="numeric"></div>
+      <div class="f"><label>Цель на Китай</label><input id="goal" type="number" inputmode="numeric"></div>
+      <div class="f"><label>Уже накоплено</label><input id="saved" type="number" inputmode="numeric"></div>
+      <div class="f"><label>Ждёшь доп. денег</label><input id="extra" type="number" inputmode="numeric"></div>
+      <div class="f"><label>Дата поездки</label><input id="date" type="date"></div>
+    </div>
+    <div class="hint" id="hint"></div>
+  </details>
+</div>
+
+<button class="ghost" id="newWeek" style="width:100%">Начать новую неделю</button>
+</main>
+
+<script>
+const KEY='weekly_planner_v1';
+const def={income:5500,fuel:1600,food:1500,goal:100000,saved:0,extra:60000,date:'2027-09-01',log:[]};
+const CATS=[['fuel','Бензин','--c-fuel'],['food','Продукты','--c-food'],['china','Китай','--c-china'],['self','На себя','--c-self']];
+let S={...def};
+try{const r=localStorage.getItem(KEY);if(r)S={...def,...JSON.parse(r)}}catch(e){}
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('ru-RU').replace(/\u00a0/g,' ')+' ₽';
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const num=v=>Math.max(0,parseFloat(v)||0);
+
+$('cat').innerHTML=CATS.map(c=>`<option value="${c[0]}">${c[1]}</option>`).join('');
+['income','fuel','food','goal','saved','extra','date'].forEach(k=>{
+  $(k).value=S[k];
+  $(k).addEventListener('input',e=>{S[k]=k==='date'?e.target.value:num(e.target.value);save();render()});
+});
+
+function calc(){
+  const weeks=Math.max(1,Math.ceil((new Date(S.date)-Date.now())/6048e5)||1);
+  const need=Math.max(0,S.goal-S.saved-S.extra);
+  const china=Math.round(need/weeks/10)*10;
+  const plan={fuel:S.fuel,food:S.food,china,self:S.income-S.fuel-S.food-china};
+  return {weeks,need,plan};
+}
+function render(){
+  const {weeks,need,plan}=calc();
+  const spent={fuel:0,food:0,china:0,self:0};
+  S.log.forEach(l=>spent[l.cat]+=l.amt);
+  $('plan').innerHTML=CATS.map(([k,n,col])=>{
+    const p=plan[k],s=spent[k],left=p-s,pct=p>0?Math.min(100,s/p*100):0;
+    return `<div class="item"><div class="top"><span class="name"><i class="dot" style="background:var(${col})"></i>${n}</span>
+    <span class="sum ${p<0?'neg':''}">${fmt(p)}</span></div>
+    <div class="bar"><i style="width:${pct}%;background:var(${col})"></i></div>
+    <div class="sub">потрачено ${fmt(s)} · <span class="${left<0?'neg':''}">${left<0?'перерасход '+fmt(-left):'осталось '+fmt(left)}</span></div></div>`;
+  }).join('');
+  const total=S.saved+spent.china,left=Math.max(0,S.goal-total),pc=S.goal>0?Math.min(100,total/S.goal*100):0;
+  const wk=plan.china>0?Math.ceil(left/plan.china):0;
+  const M=[
+   [`Первый шаг самый трудный, а дальше пойдёт легче. Даже 100 ₽ в копилку уже приближают тебя к Китаю ✨`,`Поездка начинается с первой отложенной суммы. Начни сегодня — будущий ты скажет спасибо 🌅`,`Китай ждёт тебя. Осталось ${fmt(left)}, и каждая неделя что-то добавляет 🐉`],
+   [`Начало положено: ${fmt(total)} уже в копилке. Это настоящие деньги на настоящую поездку 🌱`,`Ты уже в пути, ${pc.toFixed(0)}% позади. Главное — не останавливаться 🚶`,`Маленькие суммы складываются в большие. Осталось ${fmt(left)}, а ты уже начал 💪`],
+   [`Уже ${pc.toFixed(0)}% цели! Ещё немного — и Великая стена перестанет быть мечтой 🏯`,`Ты молодец, что держишься плана. Осталось ${fmt(left)}, это примерно ${wk} нед. 🔥`,`Копилка растёт, и это видно. Продолжай в том же духе 🍜`],
+   [`Больше половины пути позади! Осталось ${fmt(left)}, ты почти у цели 🚀`,`Чувствуешь, как поездка становится ближе? Осталось ${pc>=75?'совсем чуть-чуть':'меньше половины'} 🏮`,`${pc.toFixed(0)}% собрано. Теперь ты уже не мечтаешь, а подъезжаешь к Китаю 🎋`],
+   [`Финишная прямая: осталось всего ${fmt(left)}! Билеты уже почти в кармане ✈️`,`Ты почти там. Ещё чуть-чуть, и можно бронировать всё остальное 🥢`,`Невероятно, ${pc.toFixed(0)}% уже собрано! Осталось ${fmt(left)} до мечты 🌟`]
+  ];
+  const b=left<=0?5:pc>=85?4:pc>=50?3:pc>=20?2:total>0?1:0;
+  const msg=b===5?'Цель достигнута! 🎉 Китай, жди — мы едем! Ты сам собрал эту поездку.':M[b][Math.floor(total/10)%3];
+  $('goalCard').innerHTML=`<div class="t"><span class="lbl">ЦЕЛЬ · КИТАЙ</span><span class="lbl">${pc.toFixed(0)}%</span></div>
+   <div class="amt">${fmt(total)} <span class="lbl">из ${fmt(S.goal)}</span></div>
+   <div class="bar"><i style="width:${pc}%"></i></div><div class="msg">${msg}</div>
+   <div class="sub">Записывай отложенное в категорию «Китай», и цифра будет расти.</div>`;
+  $('hint').innerHTML=`До поездки ≈ ${weeks} нед. Нужно ещё ${fmt(need)} (цель минус накопленное минус ожидаемые поступления) — это ${fmt(plan.china)} в неделю.`
+    +(plan.self<0?'<br><span class="neg">Денег не хватает на все пункты — уменьши отчисления или цель.</span>':'');
+  const items=[...S.log].reverse();
+  $('log').innerHTML=items.length?`<label>Траты этой недели · ${fmt(S.log.reduce((a,l)=>a+l.amt,0))}</label>`+items.map(l=>{
+    const c=CATS.find(c=>c[0]===l.cat);
+    return `<div><span><b>${fmt(l.amt)}</b><small>${c[1]}${l.note?' · '+l.note.replace(/</g,'&lt;'):''}</small></span><button data-id="${l.id}">✕</button></div>`;
+  }).join(''):'<label style="margin:0">Трат пока нет</label>';
+  $('log').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.log=S.log.filter(l=>l.id!=b.dataset.id);save();render()});
+}
+$('addBtn').onclick=()=>{
+  const a=num($('amt').value);if(!a)return;
+  S.log.push({id:Date.now(),cat:$('cat').value,amt:a,note:$('note').value.trim()});
+  $('amt').value='';$('note').value='';save();render();
+};
+let armed=false;
+$('newWeek').onclick=e=>{
+  if(!armed){armed=true;e.target.textContent='Точно? Нажми ещё раз — траты очистятся, «Китай» уйдёт в накопления';setTimeout(()=>{armed=false;e.target.textContent='Начать новую неделю'},4000);return}
+  S.saved+=S.log.filter(l=>l.cat==='china').reduce((a,l)=>a+l.amt,0);
+  S.log=[];$('saved').value=S.saved;save();armed=false;e.target.textContent='Начать новую неделю';render();
+};
+render();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
